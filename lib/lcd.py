@@ -16,21 +16,21 @@ class LCDReactor(Reactor):
         COL_OFFSET = 2 # You may choose to add an offset to the original position
         DURATION = 15
         PREFIX = "WARNING: "
-        START_POSITION = Display.COLS - Display.COL_OFFSET
 
         def __init__(self, msg):
             Thread.__init__(self)
-            self.msgs = [Display.PREFIX, msg]
+            LCDReactor.Display.START_POSITION = LCDReactor.Display.COLS - LCDReactor.Display.COL_OFFSET
+            self.msgs = [LCDReactor.Display.PREFIX, msg]
             self.lcd = CharLCD(pin_rs=2, pin_e=4, pins_db=[3, 14, 25, 24])
 
         def init_display(self):
             self.lcd.clear()
-            self.lcd.begin(Display.COLS, Display.ROWS)
+            self.lcd.begin(LCDReactor.Display.COLS, LCDReactor.Display.ROWS)
 
         def display_message(self):
-            self.lcd.setCursor(Display.START_POSITION, 0)
+            self.lcd.setCursor(LCDReactor.Display.START_POSITION, 0)
             self.lcd.message(self.msgs[0])
-            self.setCursor(Display.START_POSITION, 1)
+            self.lcd.setCursor(LCDReactor.Display.START_POSITION, 1)
             self.lcd.message(self.msgs[1])
 
         def shift_text(self):
@@ -41,12 +41,12 @@ class LCDReactor(Reactor):
             # Calculate the maximum length and the start position
             # Needed for when the time runs out and the message is in the
             # middle of the LCD
-            position = Display.START_POSITION
-            max_len = max(len(self.msgs[0], self.msgs[1]))
+            position = LCDReactor.Display.START_POSITION
+            max_len = max(len(self.msgs[0]), len(self.msgs[1]))
             start_time = time.time()
 
             # Display for n seconds
-            while time.time() < start_time + Display.DURATION:
+            while time.time() < start_time + LCDReactor.Display.DURATION:
                 self.shift_text()
                 position = (position + 1) % max_len
 
@@ -55,7 +55,7 @@ class LCDReactor(Reactor):
             # until the the position is out of the display.
             # "Out of display" is given by max_len (maximum image size) +
             # START_POSITION, since it starts in the right side of the LCD
-            for x in range(position, Display.START_POSITION + max_len):
+            for x in range(position, LCDReactor.Display.START_POSITION + max_len):
                 self.shift_text()
 
             self.lcd.clear()
